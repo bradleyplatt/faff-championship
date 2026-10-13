@@ -241,7 +241,8 @@ function analyse(g){
   return {tot,low,best,losers,indiv,fines,top,bench,hasBench,tieLow,indivTie};
 }
 function season(){
-  const res=[...S.gameweeks].sort((a,b)=>a.gw-b.gw).map(g=>({g,a:analyse(g)}));
+  const res=[...S.gameweeks].filter(g=>!g.live).sort((a,b)=>a.gw-b.gw).map(g=>({g,a:analyse(g)}));
+  const liveG=[...S.gameweeks].filter(g=>g.live).sort((a,b)=>a.gw-b.gw).pop();
   const cum=S.couples.map(()=>[]), run=S.couples.map(()=>0);
   res.forEach(r=>r.a.tot.forEach((t,i)=>{run[i]+=t;cum[i].push(run[i]);}));
   const per={};players().forEach(p=>per[p]={n:0,owed:0,paid:0});
@@ -252,7 +253,7 @@ function season(){
     owed:c.players.reduce((a,p)=>a+per[p].owed,0),paid:c.players.reduce((a,p)=>a+per[p].paid,0)}));
   const order=[...couples].sort((a,b)=>b.pts-a.pts);
   order.forEach((c,k)=>{c.rank=(k>0&&order[k-1].pts===c.pts)?order[k-1].rank:k+1;});
-  return {res,cum,couples,order,per,outstanding,last:res[res.length-1]};
+  return {res,cum,couples,order,per,outstanding,last:res[res.length-1],live:liveG};
 }
 
 /* ---------- chart ---------- */
@@ -304,10 +305,25 @@ function wireChart(){
 function render(){
   const Z=season(), app=$('#app'), last=Z.last; let h='';
   h+=`<header class="mastwrap"><div class="eyebrow">Fantasy Premier League · Couples · ${esc(S.season)}</div><div class="mast"><h1><span class="w1">FAFF</span><span class="w2">Championship</span></h1>`;
-  if(last)h+=`<div class="gwbadge"><span class="eyebrow">Latest</span><b>GW${last.g.gw}</b></div>`;
+  if(Z.live)h+=`<div class="gwbadge"><span class="eyebrow">In progress</span><b>GW${Z.live.gw}</b></div>`;
+  else if(last)h+=`<div class="gwbadge"><span class="eyebrow">Latest</span><b>GW${last.g.gw}</b></div>`;
   h+=`</div><div class="stripe" aria-hidden="true">${S.couples.map((c,i)=>`<span style="--c:${SERIES[i]}"></span>`).join('')}</div></header>`;
 
-  if(last){
+  if(Z.live){
+    const g=Z.live, tot=S.couples.map(c=>c.players.reduce((s,p)=>s+(+g.scores[p]||0),0));
+    const rows=S.couples.map((c,i)=>({c,i,t:tot[i]})).sort((x,y)=>y.t-x.t);
+    rows.forEach((r,k)=>{r.rank=(k>0&&rows[k-1].t===r.t)?rows[k-1].rank:k+1;});
+    const max=Math.max(...tot)||1;
+    h+=`<section class="result" aria-labelledby="v-h"><div class="result-head"><div><div class="eyebrow">This gameweek so far · updated after each match day</div><h2 id="v-h">Gameweek ${g.gw}</h2></div><span class="status prov">After ${esc(g.live)}'s matches</span></div><ol class="bars">`;
+    rows.forEach(r=>{h+=`<li class="bar-row" style="--c:${SERIES[r.i]}"><span class="rk">${r.rank}</span><span class="cn">${esc(r.c.name)}</span><span class="tt">${r.t}</span><div class="track" aria-hidden="true"><div class="fill" style="width:${(r.t/max*100).toFixed(1)}%"></div></div><span class="split">${r.c.players.map(p=>esc(p)+' '+g.scores[p]).join(' · ')}</span></li>`;});
+    h+='</ol>';
+    const lo=rows[rows.length-1], nx=rows[rows.length-2];
+    if(lo&&nx){const m=nx.t-lo.t;h+=`<p class="margin" style="border-left-color:var(--line)">${m===0?`${esc(lo.c.name)} and ${esc(nx.c.name)} are level at the bottom`:`${esc(lo.c.name)} are ${m} point${m===1?'':'s'} behind ${esc(nx.c.name)}`}, with matches still to play.</p>`;}
+    h+=`<div class="dues"><div class="eyebrow">Fines</div><div class="due"><span class="why">Fines are decided once the gameweek is final.</span></div>`;
+    if(last){const la=last.a;h+=`<div class="due"><span class="why">GW${last.g.gw}${last.g.provisional?' (provisional)':''}: lowest couple ${esc(listNames(la.losers.map(i=>S.couples[i].name)))}${la.indiv.length?`; lowest individual ${esc(listNames(la.indiv))}`:''}. Payments are listed under The pot.</span></div>`;}
+    h+='</div></section>';
+  }
+  else if(last){
     const {g,a}=last;
     const rows=S.couples.map((c,i)=>({c,i,t:a.tot[i],b:a.bench[i]})).sort((x,y)=>(y.t-x.t)||(a.hasBench?y.b-x.b:0));
     rows.forEach((r,k)=>{r.rank=(k>0&&rows[k-1].t===r.t&&(!a.hasBench||rows[k-1].b===r.b))?rows[k-1].rank:k+1;});
