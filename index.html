@@ -188,7 +188,7 @@ footer{font-size:.85rem;color:var(--ink-3);border-top:1px solid var(--line);padd
 (function(){
 let S=JSON.parse(document.getElementById('state').textContent);
 const SERIES=['var(--s1)','var(--s2)','var(--s3)'];
-let view='total';
+let view='gap';
 const $=(s,r=document)=>r.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const players=()=>S.couples.flatMap(c=>c.players);
@@ -233,12 +233,12 @@ function analyse(g){
   const loserPlayers=losers.flatMap(i=>S.couples[i].players);
   const all=players(); let indiv=[];
   if(S.rule==='b'){const pool=all.filter(p=>!loserPlayers.includes(p));if(pool.length){const m=Math.min(...pool.map(p=>g.scores[p]));indiv=pool.filter(p=>g.scores[p]===m);}}
-  let indivTie=false;
+  let indivTie=false, lowInd=[];
   if(S.rule!=='b'){const m=Math.min(...all.map(p=>g.scores[p]));let low=all.filter(p=>g.scores[p]===m);
     if(low.length>1&&hasBench){const bp=p=>+((g.bench||{})[p])||0;const mb=Math.min(...low.map(bp));const kept=low.filter(p=>bp(p)===mb);indivTie=kept.length<low.length;low=kept;}
-    indiv=low.filter(p=>!loserPlayers.includes(p));}
+    lowInd=low; indiv=low.filter(p=>!loserPlayers.includes(p));}
   const fines=[...loserPlayers.map(p=>({p,why:'couple'})),...indiv.map(p=>({p,why:'individual'}))];
-  return {tot,low,best,losers,indiv,fines,top,bench,hasBench,tieLow,indivTie};
+  return {tot,low,best,losers,indiv,fines,top,bench,hasBench,tieLow,indivTie,lowInd};
 }
 function season(){
   const res=[...S.gameweeks].filter(g=>!g.live).sort((a,b)=>a.gw-b.gw).map(g=>({g,a:analyse(g)}));
@@ -253,7 +253,9 @@ function season(){
     owed:c.players.reduce((a,p)=>a+per[p].owed,0),paid:c.players.reduce((a,p)=>a+per[p].paid,0)}));
   const order=[...couples].sort((a,b)=>b.pts-a.pts);
   order.forEach((c,k)=>{c.rank=(k>0&&order[k-1].pts===c.pts)?order[k-1].rank:k+1;});
-  return {res,cum,couples,order,per,outstanding,last:res[res.length-1],live:liveG};
+  const pl=players().map(p=>({p,pts:res.reduce((s,r)=>s+(+r.g.scores[p]||0),0),low:res.filter(r=>r.a.lowInd.includes(p)).length})).sort((x,y)=>y.pts-x.pts);
+  pl.forEach((r,k)=>{r.rank=(k>0&&pl[k-1].pts===r.pts)?pl[k-1].rank:k+1;});
+  return {res,cum,couples,order,per,outstanding,last:res[res.length-1],live:liveG,pl};
 }
 
 /* ---------- chart ---------- */
@@ -347,6 +349,9 @@ function render(){
   h+=`<section aria-labelledby="t-h"><div class="sec-head"><h2 id="t-h">Season table</h2><span class="muted small">after ${Z.res.length} gameweek${Z.res.length===1?'':'s'}</span></div><div class="tablewrap"><table><thead><tr><th>#</th><th class="l">Couple</th><th>Pts</th><th class="wide-only">Avg</th><th>Top</th><th>Last</th><th class="wide-only">Fines</th></tr></thead><tbody>`;
   Z.order.forEach(c=>{h+=`<tr><td class="pos">${c.rank}</td><td class="l"><span class="swatch" style="background:${SERIES[c.i]}"></span>${esc(c.name)}</td><td><b>${c.pts}</b></td><td class="wide-only">${c.avg.toFixed(1)}</td><td>${c.wins}</td><td>${c.spoons}</td><td class="wide-only">${gbp(c.owed)}</td></tr>`;});
   h+=`</tbody></table></div><p class="muted small">Top and Last count the weeks each couple finished first or last.</p></section>`;
+  h+=`<section aria-labelledby="p-h"><div class="sec-head"><h2 id="p-h">Player table</h2><span class="muted small">after ${Z.res.length} gameweek${Z.res.length===1?'':'s'}</span></div><div class="tablewrap"><table><thead><tr><th>#</th><th class="l">Player</th><th>Pts</th><th class="wide-only">Avg</th><th>Lowest</th></tr></thead><tbody>`;
+  Z.pl.forEach(r=>{h+=`<tr><td class="pos">${r.rank}</td><td class="l"><span class="swatch" style="background:${SERIES[coupleOf(r.p)]}"></span>${esc(r.p)}</td><td><b>${r.pts}</b></td><td class="wide-only">${Z.res.length?(r.pts/Z.res.length).toFixed(1):'–'}</td><td>${r.low}</td></tr>`;});
+  h+=`</tbody></table></div><p class="muted small">Lowest counts the weeks each player had the lowest score of all six.</p></section>`;
 
   h+=`<section aria-labelledby="c-h"><div class="sec-head"><h2 id="c-h">The race</h2><div class="seg" role="group" aria-label="Chart view"><button id="v-total" aria-pressed="${view==='total'}">Running total</button><button id="v-gap" aria-pressed="${view==='gap'}">Gap to leader</button></div></div>`;
   h+=`<div class="chartcard"><div class="legend">${S.couples.map((c,i)=>`<span><span class="swatch" style="background:${SERIES[i]}"></span>${esc(c.name)}</span>`).join('')}</div>${chartSVG(Z)}<div class="tip" id="tip" hidden></div></div>`;
