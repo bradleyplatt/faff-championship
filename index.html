@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en-GB"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FAFF Championship</title>
+<meta name="description" content="Weekly results, fines and the season table for the FAFF couples Fantasy Premier League.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="FAFF Championship">
+<meta property="og:title" content="FAFF Championship">
+<meta property="og:description" content="This week's result, who's fined, and the season table.">
+<meta property="og:url" content="https://faffchampionship.co.uk/">
+<meta property="og:image" content="https://faffchampionship.co.uk/og.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#f4f5f7">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style>
+<style>
+/* Layout: matchday notice board. Owner jobs (owner only) → this week's result bars → table → race → money → raw scores → admin. */
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --sunk:#eceef2; --line:#d9dce3; --track:#eceef2;
+  --ink:#141821; --ink-2:#4a5160; --ink-3:#6e7584;
+  --gold:#8a5f00; --gold-soft:#f6ecd2;
+  --fine:#b3261e; --fine-soft:#fbe4e1;
+  --ok:#1d7a46; --ok-soft:#dff1e6;
+  --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a;
+  --display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --brand:"Big Shoulders Display","Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1218; --surface:#171b23; --sunk:#1f242e; --line:#2c3240; --track:#252b36;
+  --ink:#eef0f4; --ink-2:#b5bbc7; --ink-3:#8d94a2;
+  --gold:#e3b54a; --gold-soft:#3a2f14;
+  --fine:#f2766b; --fine-soft:#3d1c19;
+  --ok:#5cc58a; --ok-soft:#173326;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1218; --surface:#171b23; --sunk:#1f242e; --line:#2c3240; --track:#252b36;
+  --ink:#eef0f4; --ink-2:#b5bbc7; --ink-3:#8d94a2;
+  --gold:#e3b54a; --gold-soft:#3a2f14;
+  --fine:#f2766b; --fine-soft:#3d1c19;
+  --ok:#5cc58a; --ok-soft:#173326;
+  --s1:#3987e5; --s2:#d95926; --s3:#199e70; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:18px 48px}
+#app{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:30px}
+h1,h2,h3{font-family:var(--display);font-weight:700;letter-spacing:.01em;margin:0;text-wrap:balance;line-height:1.05}
+h2{font-family:var(--brand);font-weight:800;font-size:1.7rem;text-transform:uppercase;letter-spacing:.01em}
+p{margin:0}
+.eyebrow{font-family:var(--display);font-weight:600;font-size:.82rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.num{font-variant-numeric:tabular-nums}
+section{display:flex;flex-direction:column;gap:12px;min-width:0}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px 12px;flex-wrap:wrap}
+.muted{color:var(--ink-2)}
+.small{font-size:.875rem}
+
+/* Masthead */
+.mastwrap{display:flex;flex-direction:column;gap:12px}
+.mast{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
+.mast h1{font-family:var(--brand);font-weight:900;text-transform:uppercase;line-height:.85;letter-spacing:.005em;display:flex;flex-direction:column}
+.mast h1 .w1{font-size:clamp(3.6rem,15vw,6.2rem)}
+.mast h1 .w2{font-size:clamp(1.35rem,5.4vw,2.3rem);font-weight:700;letter-spacing:.06em;color:var(--ink-2)}
+.gwbadge{display:flex;flex-direction:column;align-items:flex-end;flex:none;text-align:right}
+.gwbadge b{font-family:var(--brand);font-size:clamp(2.4rem,9vw,3.8rem);line-height:.85;font-weight:800}
+
+/* Chips */
+.chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--display);font-weight:600;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:2px 9px;width:max-content;white-space:nowrap}
+.chip.fine{background:var(--fine-soft);color:var(--fine)}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.gold{background:var(--gold-soft);color:var(--gold)}
+.chip svg{width:13px;height:13px;flex:none}
+
+/* Weekly result */
+.result{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px;display:flex;flex-direction:column;gap:16px}
+.result-head{display:flex;justify-content:space-between;align-items:flex-end;gap:8px 12px;flex-wrap:wrap}
+.result-head h2{font-family:var(--brand);font-weight:800;font-size:clamp(2rem,7vw,2.6rem);text-transform:uppercase;letter-spacing:.01em;line-height:.9}
+.status{font-family:var(--display);font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:.85rem;border-radius:999px;padding:2px 10px;border:1.5px solid currentColor}
+.status.prov{color:var(--gold)}
+.status.final{color:var(--ok)}
+.bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.bar-row{display:grid;grid-template-columns:2rem minmax(0,1fr) 3.6rem;grid-template-areas:"rk name tot" "rk track tot" "rk split tot";gap:5px 12px;align-items:center}
+.bar-row .rk{font-family:var(--brand);font-weight:800;font-size:1.6rem;color:var(--ink-3);text-align:center;grid-area:rk}
+.bar-row .cn{font-weight:600;font-size:1.02rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;grid-area:name}
+.bar-row .tt{font-family:var(--brand);font-weight:800;font-size:2.1rem;line-height:1;font-variant-numeric:tabular-nums;grid-area:tot;text-align:right}
+.track{height:12px;border-radius:999px;background:var(--track);overflow:hidden;grid-area:track}
+.fill{height:100%;border-radius:999px;background:var(--c)}
+.split{grid-area:split;font-size:.85rem;color:var(--ink-2);font-variant-numeric:tabular-nums;margin-top:-2px}
+.bar-row.low .tt,.bar-row.low .rk{color:var(--fine)}
+.spoon{font-family:var(--display);font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--fine);border:2px solid var(--fine);border-radius:4px;padding:0 6px;transform:rotate(-4deg);display:inline-block;line-height:1.5}
+.crown{font-family:var(--display);font-weight:700;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);background:var(--gold-soft);border-radius:4px;padding:0 6px;line-height:1.5}
+.margin{font-size:.92rem;color:var(--ink-2);border-left:3px solid var(--fine);padding-left:10px}
+.dues{display:flex;flex-direction:column;border-top:1px solid var(--line);padding-top:10px}
+.due{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+.dues .eyebrow+.due{border-top:0}
+.due .who{font-weight:600}
+.due .why{color:var(--ink-2);font-size:.88rem}
+.stripe{display:flex;height:6px;border-radius:999px;overflow:hidden;gap:3px}
+.stripe span{flex:1;background:var(--c)}
+
+/* Buttons */
+button{font:inherit;cursor:pointer}
+.btn{font-family:var(--display);font-weight:600;font-size:1rem;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--ink);background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 14px;min-height:40px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.small{font-size:.88rem;padding:4px 12px;min-height:34px}
+.btn.danger{background:transparent;color:var(--fine);border-color:var(--fine)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn:focus-visible,.seg button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid var(--s1);outline-offset:2px}
+
+/* Tables */
+.tablewrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th{font-family:var(--display);font-weight:600;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-3);background:var(--sunk)}
+tr:last-child td{border-bottom:0}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+td.l{font-weight:600}
+.swatch{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:middle;flex:none}
+.pos{font-family:var(--brand);font-weight:700;font-size:1.25rem;width:2em}
+td.f{color:var(--fine);font-weight:600}
+.mark{font-family:var(--display);font-weight:700;font-size:.72rem;letter-spacing:.08em;color:var(--fine);margin-left:3px;vertical-align:super}
+@media (max-width:560px){.wide-only{display:none}th,td{padding:9px 7px}td.l{white-space:normal;min-width:7.5em}}
+.sticky th:first-child,.sticky td:first-child{position:sticky;left:0;background:var(--surface);z-index:1;box-shadow:1px 0 0 var(--line)}
+.sticky th:first-child{background:var(--sunk)}
+td.lowcell{background:var(--fine-soft);color:var(--fine);font-weight:700}
+
+/* Chart */
+.chartcard{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 12px 8px;position:relative}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);font-family:var(--display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:6px 12px;font-size:.9rem}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.88rem;color:var(--ink-2)}
+svg.chart{width:100%;height:auto;display:block;overflow:visible;touch-action:pan-y}
+svg.chart text{fill:var(--ink-3);font-family:var(--body);font-size:12px}
+svg.chart .grid{stroke:var(--line);stroke-width:1}
+svg.chart .lbl{font-weight:600;fill:var(--ink)}
+svg.chart .cross{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:3 3}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);border-radius:8px;padding:8px 10px;font-size:.85rem;line-height:1.35;min-width:160px;box-shadow:0 6px 18px rgba(0,0,0,.18);z-index:2}
+.tip b{font-family:var(--display);letter-spacing:.06em;text-transform:uppercase}
+.tip .row{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+
+/* Money */
+.kitty{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.kitty div{background:var(--surface);padding:12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kitty b{font-family:var(--brand);font-size:1.9rem;font-weight:700;line-height:1}
+details{background:var(--surface);border:1px solid var(--line);border-radius:10px}
+summary{cursor:pointer;padding:12px 14px;font-family:var(--display);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+details .tablewrap{border:0;border-top:1px solid var(--line);border-radius:0 0 10px 10px}
+
+/* Owner */
+.adminbar{border:2px solid var(--ink);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;font-size:.95rem}
+.adminlink{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.adminlink code{font-size:.8rem;background:var(--sunk);padding:6px 8px;border-radius:6px;word-break:break-all;min-width:0;flex:1 1 14rem}
+.jobs{background:var(--gold-soft);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.jobs h2{font-size:1.3rem}
+.job{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:8px 0;border-top:1px solid color-mix(in srgb,var(--gold) 25%,transparent)}
+.job:first-of-type{border-top:0}
+.job span{min-width:0}
+.paidat{align-items:flex-end}
+.paidat label{display:flex;flex-direction:column;font-weight:600;font-size:.95rem}
+.paidat input{max-width:15rem}
+.jobs .acts{display:flex;flex-wrap:wrap;gap:8px}
+.owner-wrap{border:2px dashed var(--line);background:transparent}
+.owner-wrap summary{color:var(--ink-2);font-size:.95rem}
+.owner{padding:4px 16px 16px;display:flex;flex-direction:column;gap:14px}
+.form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+@media (max-width:620px){.form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:.85rem;color:var(--ink-2)}
+.check{display:flex;gap:8px;align-items:center;font-size:.95rem}
+.check input{width:18px;height:18px;accent-color:var(--ink)}
+input[type=number],input[type=datetime-local],select{font:inherit;font-variant-numeric:tabular-nums;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);width:100%}
+.row-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.msg{font-size:.9rem;color:var(--ink-2)}
+.msg:empty{display:none}
+footer{font-size:.85rem;color:var(--ink-3);border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head><body>
+<main id="app" aria-live="polite"><p>Loading the table…</p></main>
+<script type="application/json" id="state">{"season":"2026/27","league":"FAFF","fine":5,"rule":"a","couples":[{"name":"Bradley & Darren","players":["Bradley","Darren"]},{"name":"Jon & Bill","players":["Jon","Bill"]},{"name":"Jack & Sean","players":["Jack","Sean"]}],"gameweeks":[{"gw":1,"scores":{"Bradley":64,"Darren":46,"Jon":48,"Bill":66,"Jack":54,"Sean":53},"paid":{"Jack":true,"Sean":true,"Darren":true}},{"gw":2,"scores":{"Bradley":100,"Darren":110,"Jon":80,"Bill":77,"Jack":80,"Sean":100},"paid":{"Jon":true,"Bill":true}},{"gw":3,"scores":{"Bradley":38,"Darren":53,"Jon":48,"Bill":44,"Jack":71,"Sean":54},"paid":{"Bradley":true,"Darren":true}},{"gw":4,"scores":{"Bradley":90,"Darren":94,"Jon":74,"Bill":54,"Jack":82,"Sean":88},"paid":{"Jon":true,"Bill":true}},{"gw":5,"scores":{"Bradley":42,"Darren":52,"Jon":54,"Bill":38,"Jack":67,"Sean":37},"paid":{"Jon":true,"Bill":true,"Sean":true}},{"gw":6,"scores":{"Bradley":64,"Darren":65,"Jon":62,"Bill":68,"Jack":63,"Sean":76},"paid":{"Bradley":true},"provisional":true}],"updated":"2026-10-13","deadlines":{"1":"2026-08-21T17:30:00Z","2":"2026-08-28T17:30:00Z","3":"2026-09-04T17:30:00Z","4":"2026-09-12T12:30:00Z","5":"2026-09-18T17:30:00Z","6":"2026-10-10T10:00:00Z","7":"2026-10-17T10:00:00Z","8":"2026-10-23T17:30:00Z","9":"2026-10-31T11:00:00Z","10":"2026-11-06T18:30:00Z","11":"2026-11-21T11:00:00Z","12":"2026-11-27T18:30:00Z","13":"2026-12-02T18:30:00Z","14":"2026-12-05T13:30:00Z","15":"2026-12-12T13:30:00Z","16":"2026-12-19T13:30:00Z","17":"2026-12-26T11:00:00Z","18":"2026-12-29T18:00:00Z","19":"2027-01-01T18:30:00Z","20":"2027-01-05T18:00:00Z","21":"2027-01-16T13:30:00Z","22":"2027-01-23T13:30:00Z","23":"2027-01-30T13:30:00Z","24":"2027-02-06T13:30:00Z","25":"2027-02-10T18:30:00Z","26":"2027-02-20T13:30:00Z","27":"2027-02-27T13:30:00Z","28":"2027-03-03T18:30:00Z","29":"2027-03-13T13:30:00Z","30":"2027-03-20T13:30:00Z","31":"2027-04-10T12:30:00Z","32":"2027-04-17T12:30:00Z","33":"2027-04-24T12:30:00Z","34":"2027-05-01T12:30:00Z","35":"2027-05-08T12:30:00Z","36":"2027-05-15T12:30:00Z","37":"2027-05-23T12:30:00Z","38":"2027-05-30T13:30:00Z"},"late":true}</script>
+<script>
+(function(){
+let S=JSON.parse(document.getElementById('state').textContent);
+const SERIES=['var(--s1)','var(--s2)','var(--s3)'];
+let view='total';
+const $=(s,r=document)=>r.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const players=()=>S.couples.flatMap(c=>c.players);
+const coupleOf=p=>S.couples.findIndex(c=>c.players.includes(p));
+const gbp=n=>'£'+n.toFixed(0);
+const isPaid=(g,p)=>!!(g.paid&&g.paid[p]);
+const NOW=Date.now();
+const fmtD=t=>new Date(t).toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+function lateCount(g,p){
+  if(!S.late)return 0;
+  const pv=g.paid&&g.paid[p];
+  const until=pv===true?-Infinity:(typeof pv==='string'?Date.parse(pv):NOW);
+  let n=0;DL().forEach(([k,ms])=>{if(k>g.gw&&ms<=until)n++;});
+  return n;
+}
+/* All deadlines that can trigger a late charge: FPL's 38, then weekly after GW38 so season-end fines still fall due. */
+let _DL=null;
+function DL(){
+  if(_DL)return _DL;
+  const a=Object.entries(S.deadlines||{}).map(([k,d])=>[+k,Date.parse(d)]).filter(x=>!isNaN(x[1]));
+  const last=a.find(x=>x[0]===38);
+  if(last&&S.seasonEndWeekly!==false)for(let k=1;k<=26;k++)a.push([38+k,last[1]+k*7*864e5]);
+  a.sort((x,y)=>x[1]-y[1]);return _DL=a;
+}
+function nextDeadline(gw){const d=DL().find(([k,ms])=>k>gw&&ms>NOW);return d?d[1]:undefined;}
+const listNames=a=>a.length<2?a.join(''):a.slice(0,-1).join(', ')+' and '+a[a.length-1];
+const ICON_FINE='<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 4v5M8 11.2v.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+const ICON_OK='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const paidChip=ok=>ok?`<span class="chip ok">${ICON_OK}Paid</span>`:`<span class="chip fine">${ICON_FINE}Owes</span>`;
+
+/* ---------- rules ---------- */
+function analyse(g){
+  const tot=S.couples.map(c=>c.players.reduce((a,p)=>a+(+g.scores[p]||0),0));
+  const low=Math.min(...tot), best=Math.max(...tot);
+  const losers=tot.map((t,i)=>t===low?i:-1).filter(i=>i>=0);
+  const loserPlayers=losers.flatMap(i=>S.couples[i].players);
+  const all=players(); let indiv=[];
+  if(S.rule==='b'){const pool=all.filter(p=>!loserPlayers.includes(p));if(pool.length){const m=Math.min(...pool.map(p=>g.scores[p]));indiv=pool.filter(p=>g.scores[p]===m);}}
+  else{const m=Math.min(...all.map(p=>g.scores[p]));indiv=all.filter(p=>g.scores[p]===m&&!loserPlayers.includes(p));}
+  const fines=[...loserPlayers.map(p=>({p,why:'couple'})),...indiv.map(p=>({p,why:'individual'}))];
+  return {tot,low,best,losers,indiv,fines,top:tot.map((t,i)=>t===best?i:-1).filter(i=>i>=0)};
+}
+function season(){
+  const res=[...S.gameweeks].sort((a,b)=>a.gw-b.gw).map(g=>({g,a:analyse(g)}));
+  const cum=S.couples.map(()=>[]), run=S.couples.map(()=>0);
+  res.forEach(r=>r.a.tot.forEach((t,i)=>{run[i]+=t;cum[i].push(run[i]);}));
+  const per={};players().forEach(p=>per[p]={n:0,owed:0,paid:0});
+  const outstanding=[];
+  res.forEach(({g,a})=>a.fines.forEach(f=>{f.late=lateCount(g,f.p);f.amount=S.fine*(1+f.late);f.paid=isPaid(g,f.p);f.due=f.paid?null:nextDeadline(g.gw);per[f.p].n++;per[f.p].owed+=f.amount;if(f.paid)per[f.p].paid+=f.amount;else outstanding.push({gw:g.gw,p:f.p,why:f.why,amount:f.amount,late:f.late,due:f.due});}));
+  const couples=S.couples.map((c,i)=>({i,name:c.name,pts:run[i],avg:res.length?run[i]/res.length:0,
+    spoons:res.filter(r=>r.a.losers.includes(i)).length,wins:res.filter(r=>r.a.top.includes(i)).length,
+    owed:c.players.reduce((a,p)=>a+per[p].owed,0),paid:c.players.reduce((a,p)=>a+per[p].paid,0)}));
+  const order=[...couples].sort((a,b)=>b.pts-a.pts);
+  order.forEach((c,k)=>{c.rank=(k>0&&order[k-1].pts===c.pts)?order[k-1].rank:k+1;});
+  return {res,cum,couples,order,per,outstanding,last:res[res.length-1]};
+}
+
+/* ---------- chart ---------- */
+function nice(r){const p=Math.pow(10,Math.floor(Math.log10(r)));const f=r/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p;}
+function chartSVG(Z){
+  const n=Z.res.length; if(!n)return'';
+  const cw=(($('#app')||{}).clientWidth||640)-26;
+  const W=Math.round(Math.max(320,Math.min(760,cw))),H=Math.round(Math.max(230,Math.min(300,W*0.48))),pl=40,pr=96,pt=14,pb=30;
+  const gws=Z.res.map(r=>r.g.gw);
+  const data=view==='total'?Z.cum:Z.cum.map(s=>s.map((v,k)=>v-Math.max(...Z.cum.map(x=>x[k]))));
+  const flat=data.flat();
+  let lo=view==='total'?0:Math.min(-10,...flat), hi=view==='total'?Math.max(...flat):0;
+  const step=nice((hi-lo)/4||10); lo=Math.floor(lo/step)*step; hi=Math.ceil(hi/step)*step; if(hi===lo)hi=lo+step;
+  const x=k=>n===1?pl+(W-pl-pr)/2:pl+k*(W-pl-pr)/(n-1);
+  const y=v=>pt+(hi-v)*(H-pt-pb)/(hi-lo);
+  let s=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${view==='total'?'Running points total':'Points behind the leader'} by gameweek for each couple">`;
+  for(let v=lo;v<=hi+1e-9;v+=step)s+=`<line class="grid" x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}"/><text x="${pl-8}" y="${y(v)+4}" text-anchor="end">${v}</text>`;
+  const every=Math.ceil(n/Math.max(2,Math.floor((W-pl-pr)/44)));
+  gws.forEach((gw,k)=>{if(k%every===0||k===n-1)s+=`<text x="${x(k)}" y="${H-8}" text-anchor="middle">GW${gw}</text>`;});
+  const ends=data.map((d,i)=>({i,y:y(d[n-1]),v:d[n-1]})).sort((a,b)=>a.y-b.y);
+  for(let k=1;k<ends.length;k++)if(ends[k].y-ends[k-1].y<16)ends[k].y=ends[k-1].y+16;
+  data.forEach((d,i)=>{
+    if(n>1)s+=`<polyline points="${d.map((v,k)=>`${x(k)},${y(v)}`).join(' ')}" fill="none" stroke="${SERIES[i]}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+    s+=`<circle cx="${x(n-1)}" cy="${y(d[n-1])}" r="5" fill="${SERIES[i]}" stroke="var(--surface)" stroke-width="2"/>`;
+  });
+  ends.forEach(e=>{s+=`<text class="lbl" x="${W-pr+12}" y="${e.y+4}">${esc(S.couples[e.i].players.map(w=>w[0]).join('&'))} · ${e.v}</text>`;});
+  s+=`<line class="cross" id="cross" x1="0" x2="0" y1="${pt}" y2="${H-pb}" visibility="hidden"/><rect id="hit" x="${pl-10}" y="${pt}" width="${W-pl-pr+20}" height="${H-pt-pb}" fill="transparent"/></svg>`;
+  chartSVG.meta={W,n,x,data,gws};
+  return s;
+}
+function wireChart(){
+  const svg=$('svg.chart'),tip=$('#tip'),hit=$('#hit'),cross=$('#cross'); if(!svg||!hit)return;
+  const M=chartSVG.meta;
+  const move=ev=>{
+    const r=svg.getBoundingClientRect(),px=(ev.clientX-r.left)*M.W/r.width;
+    let k=0,bd=1e9;for(let j=0;j<M.n;j++){const d=Math.abs(M.x(j)-px);if(d<bd){bd=d;k=j;}}
+    cross.setAttribute('x1',M.x(k));cross.setAttribute('x2',M.x(k));cross.setAttribute('visibility','visible');
+    tip.innerHTML=`<b>After GW${M.gws[k]}</b>`+M.data.map((d,i)=>({i,v:d[k]})).sort((a,b)=>b.v-a.v).map(o=>`<div class="row"><span><span class="swatch" style="background:${SERIES[o.i]}"></span>${esc(S.couples[o.i].name)}</span><span>${o.v}</span></div>`).join('');
+    tip.hidden=false;
+    const card=svg.parentElement.getBoundingClientRect();
+    let left=ev.clientX-card.left+14;if(left+tip.offsetWidth>card.width-6)left=ev.clientX-card.left-tip.offsetWidth-14;
+    tip.style.left=Math.max(6,left)+'px';tip.style.top=Math.max(4,ev.clientY-card.top-tip.offsetHeight-12)+'px';
+  };
+  hit.addEventListener('pointermove',move);hit.addEventListener('pointerdown',move);
+  hit.addEventListener('pointerleave',()=>{tip.hidden=true;cross.setAttribute('visibility','hidden');});
+}
+
+/* ---------- render ---------- */
+function render(){
+  const Z=season(), app=$('#app'), last=Z.last; let h='';
+  h+=`<header class="mastwrap"><div class="eyebrow">Fantasy Premier League · Couples · ${esc(S.season)}</div><div class="mast"><h1><span class="w1">FAFF</span><span class="w2">Championship</span></h1>`;
+  if(last)h+=`<div class="gwbadge"><span class="eyebrow">Latest</span><b>GW${last.g.gw}</b></div>`;
+  h+=`</div><div class="stripe" aria-hidden="true">${S.couples.map((c,i)=>`<span style="--c:${SERIES[i]}"></span>`).join('')}</div></header>`;
+
+  if(last){
+    const {g,a}=last;
+    const rows=S.couples.map((c,i)=>({c,i,t:a.tot[i]})).sort((x,y)=>y.t-x.t);
+    rows.forEach((r,k)=>{r.rank=(k>0&&rows[k-1].t===r.t)?rows[k-1].rank:k+1;});
+    const max=Math.max(...a.tot)||1;
+    h+=`<section class="result" aria-labelledby="v-h"><div class="result-head"><div><div class="eyebrow">This week's result · updates automatically</div><h2 id="v-h">Gameweek ${g.gw}</h2></div><span class="status ${g.provisional?'prov':'final'}">${g.provisional?'Provisional · bonus to come':'Final · bonus included'}</span></div><ol class="bars">`;
+    rows.forEach(r=>{
+      const low=a.losers.includes(r.i), top=a.top.includes(r.i)&&!low;
+      h+=`<li class="bar-row${low?' low':''}" style="--c:${SERIES[r.i]}"><span class="rk">${r.rank}</span><span class="cn">${esc(r.c.name)}${low?'<span class="spoon">Wooden spoon</span>':''}${top?'<span class="crown">Top couple</span>':''}</span><span class="tt">${r.t}</span><div class="track" aria-hidden="true"><div class="fill" style="width:${(r.t/max*100).toFixed(1)}%"></div></div><span class="split">${r.c.players.map(p=>esc(p)+' '+g.scores[p]).join(' · ')}</span></li>`;
+    });
+    h+='</ol>';
+    const lowT=a.low, above=a.tot.filter(x=>x>lowT);
+    if(above.length&&a.losers.length===1){const next=Math.min(...above),ni=a.tot.indexOf(next);const m=next-lowT;h+=`<p class="margin">${esc(S.couples[a.losers[0]].name)} finished ${m} point${m===1?'':'s'} behind ${esc(S.couples[ni].name)}.</p>`;}
+    else if(a.losers.length>1)h+=`<p class="margin">A tie at the bottom, so both couples pay.</p>`;
+    h+='<div class="dues"><div class="eyebrow">Fines this week · '+gbp(a.fines.reduce((s,f)=>s+f.amount,0))+'</div>';
+    a.fines.forEach(f=>{h+=`<div class="due"><span><span class="who">${esc(f.p)}</span> <span class="why">· ${f.why==='couple'?'lowest couple':'lowest individual, '+g.scores[f.p]+' pts'} · ${gbp(f.amount)}${f.late?' incl. '+gbp(f.late*S.fine)+' late':''}${f.due?(f.late?' · goes up again ':' · due by ')+fmtD(f.due):''}</span></span>${paidChip(f.paid)}</div>`;});
+    if(!a.indiv.length)h+=`<div class="due"><span class="why">No extra individual fine. The lowest scorer was already in the losing couple.</span></div>`;
+    h+='</div></section>';
+  }
+
+  h+=`<section aria-labelledby="t-h"><div class="sec-head"><h2 id="t-h">Season table</h2><span class="muted small">after ${Z.res.length} gameweek${Z.res.length===1?'':'s'}</span></div><div class="tablewrap"><table><thead><tr><th>#</th><th class="l">Couple</th><th>Pts</th><th class="wide-only">Avg</th><th>Top</th><th>Last</th><th class="wide-only">Fines</th></tr></thead><tbody>`;
+  Z.order.forEach(c=>{h+=`<tr><td class="pos">${c.rank}</td><td class="l"><span class="swatch" style="background:${SERIES[c.i]}"></span>${esc(c.name)}</td><td><b>${c.pts}</b></td><td class="wide-only">${c.avg.toFixed(1)}</td><td>${c.wins}</td><td>${c.spoons}</td><td class="wide-only">${gbp(c.owed)}</td></tr>`;});
+  h+=`</tbody></table></div><p class="muted small">Top and Last count the weeks each couple finished first or last.</p></section>`;
+
+  h+=`<section aria-labelledby="c-h"><div class="sec-head"><h2 id="c-h">The race</h2><div class="seg" role="group" aria-label="Chart view"><button id="v-total" aria-pressed="${view==='total'}">Running total</button><button id="v-gap" aria-pressed="${view==='gap'}">Gap to leader</button></div></div>`;
+  h+=`<div class="chartcard"><div class="legend">${S.couples.map((c,i)=>`<span><span class="swatch" style="background:${SERIES[i]}"></span>${esc(c.name)}</span>`).join('')}</div>${chartSVG(Z)}<div class="tip" id="tip" hidden></div></div>`;
+  h+=`<p class="muted small">${view==='total'?'Points piled up week by week. Switch to “Gap to leader” to see how far behind each couple is.':'How many points each couple trails the leader by after each gameweek. The leader sits on zero.'}</p></section>`;
+
+  const tOwed=Object.values(Z.per).reduce((a,v)=>a+v.owed,0), tPaid=Object.values(Z.per).reduce((a,v)=>a+v.paid,0);
+  h+=`<section aria-labelledby="k-h"><div class="sec-head"><h2 id="k-h">The pot</h2></div><div class="kitty"><div><span class="eyebrow">Fines so far</span><b class="num">${gbp(tOwed)}</b></div><div><span class="eyebrow">Paid in</span><b class="num">${gbp(tPaid)}</b></div><div><span class="eyebrow">Still owed</span><b class="num" style="color:${tOwed-tPaid>0?'var(--fine)':'var(--ok)'}">${gbp(tOwed-tPaid)}</b></div></div>`;
+  h+=`<div class="tablewrap"><table><thead><tr><th class="l">Player</th><th>Fines</th><th>Total</th><th>Owing</th></tr></thead><tbody>`;
+  players().map(p=>({p,...Z.per[p]})).sort((a,b)=>b.owed-a.owed||a.p.localeCompare(b.p)).forEach(r=>{
+    h+=`<tr><td class="l"><span class="swatch" style="background:${SERIES[coupleOf(r.p)]}"></span>${esc(r.p)}</td><td>${r.n}</td><td>${gbp(r.owed)}</td><td${r.owed>r.paid?' class="f"':''}>${r.owed>r.paid?gbp(r.owed-r.paid):'–'}</td></tr>`;});
+  h+=`</tbody></table></div>`;
+  const allF=[];[...Z.res].reverse().forEach(({g,a})=>a.fines.forEach(f=>allF.push({g,f})));
+  h+=`<details><summary>Every fine so far (${allF.length})</summary><div class="tablewrap"><table><thead><tr><th>GW</th><th class="l">Who</th><th class="l">Why</th><th>Amount</th><th></th></tr></thead><tbody>`;
+  allF.forEach(({g,f})=>{h+=`<tr><td>GW${g.gw}</td><td class="l">${esc(f.p)}</td><td class="l" style="font-weight:400">${f.why==='couple'?'Lowest couple':'Lowest individual'}${f.late?' + '+f.late+' late':''}</td><td>${gbp(f.amount)}</td><td>${paidChip(f.paid)}</td></tr>`;});
+  h+='</tbody></table></div></details></section>';
+
+  h+=`<section aria-labelledby="w-h"><div class="sec-head"><h2 id="w-h">Every gameweek</h2><span class="muted small"><span class="mark">F</span> fined · <span style="color:var(--fine);font-weight:600">red</span> lowest couple</span></div><div class="tablewrap sticky"><table><thead><tr><th>GW</th>`;
+  S.couples.forEach(c=>{c.players.forEach(p=>h+=`<th>${esc(p)}</th>`);h+=`<th>${esc(c.players.map(w=>w[0]).join('+'))}</th>`;});
+  h+='</tr></thead><tbody>';
+  [...Z.res].reverse().forEach(({g,a})=>{h+=`<tr><td>GW${g.gw}${g.provisional?'*':''}</td>`;S.couples.forEach((c,i)=>{c.players.forEach(p=>{h+=`<td>${g.scores[p]}${a.fines.some(x=>x.p===p)?'<span class="mark">F</span>':''}</td>`;});h+=`<td${a.losers.includes(i)?' class="lowcell"':' style="font-weight:600"'}>${a.tot[i]}</td>`;});h+='</tr>';});
+  h+='</tbody></table></div></section>';
+
+  h+=`<section aria-labelledby="r-h"><h2 id="r-h">House rules</h2><div class="muted" style="display:flex;flex-direction:column;gap:6px"><p>The couple with the lowest combined score each week pays ${gbp(S.fine)} per partner. Tied couples all pay.</p><p>${S.rule==='a'?`The player with the lowest individual score also pays ${gbp(S.fine)}, unless they are already in the losing couple.`:`The lowest scorer outside the losing couple also pays ${gbp(S.fine)}.`} Tied players all pay.</p>${S.late?`<p>A fine not paid by the next gameweek's FPL deadline goes up by ${gbp(S.fine)}, and by another ${gbp(S.fine)} at every deadline after that until it is paid. Fines from the last gameweek fall due 7 days after the GW38 deadline, then go up by ${gbp(S.fine)} each week after that.</p>`:''}<p>Scores are FPL gameweek points after transfer hits, so season totals match the official game.</p></div></section>`;
+
+  h+=`<footer>${S.league?esc(S.league)+' league · ':''}Scores from the official Fantasy Premier League game.${S.gameweeks.some(g=>g.provisional)?' * Provisional until bonus points are added.':''} Last updated ${esc(S.updated||'')}.</footer>`;
+  app.innerHTML=h;
+  wire(Z);
+}
+
+/* ---------- interactions ---------- */
+function wire(Z){
+  wireChart();
+  $('#v-total').onclick=()=>{view='total';render();};
+  $('#v-gap').onclick=()=>{view='gap';render();};
+}
+
+
+render();
+let rz,lastW=window.innerWidth;
+window.addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(Math.abs(window.innerWidth-lastW)<40)return;lastW=window.innerWidth;const a=document.activeElement;if(a&&(a.tagName==='INPUT'||a.tagName==='SELECT'))return;render();},200);});
+})();
+</script>
+</body></html>
