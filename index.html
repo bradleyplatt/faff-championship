@@ -126,6 +126,8 @@ td.f{color:var(--fine);font-weight:600}
 @media (max-width:560px){.wide-only{display:none}th,td{padding:9px 7px}td.l{white-space:normal;min-width:7.5em}}
 .sticky th:first-child,.sticky td:first-child{position:sticky;left:0;background:var(--surface);z-index:1;box-shadow:1px 0 0 var(--line)}
 .sticky th:first-child{background:var(--sunk)}
+.swipe{display:none}
+@media (max-width:560px){.swipe{display:block}}
 td.lowcell{background:var(--fine-soft);color:var(--fine);font-weight:700}
 
 /* Chart */
@@ -301,7 +303,7 @@ function render(){
     const rows=S.couples.map((c,i)=>({c,i,t:a.tot[i]})).sort((x,y)=>y.t-x.t);
     rows.forEach((r,k)=>{r.rank=(k>0&&rows[k-1].t===r.t)?rows[k-1].rank:k+1;});
     const max=Math.max(...a.tot)||1;
-    h+=`<section class="result" aria-labelledby="v-h"><div class="result-head"><div><div class="eyebrow">This week's result · updates automatically</div><h2 id="v-h">Gameweek ${g.gw}</h2></div><span class="status ${g.provisional?'prov':'final'}">${g.provisional?'Provisional · bonus to come':'Final · bonus included'}</span></div><ol class="bars">`;
+    h+=`<section class="result" aria-labelledby="v-h"><div class="result-head"><div><div class="eyebrow">Latest result · updates automatically</div><h2 id="v-h">Gameweek ${g.gw}</h2></div><span class="status ${g.provisional?'prov':'final'}">${g.provisional?'Provisional · bonus to come':'Final · bonus included'}</span></div><ol class="bars">`;
     rows.forEach(r=>{
       const low=a.losers.includes(r.i), top=a.top.includes(r.i)&&!low;
       h+=`<li class="bar-row${low?' low':''}" style="--c:${SERIES[r.i]}"><span class="rk">${r.rank}</span><span class="cn">${esc(r.c.name)}${low?'<span class="spoon">Wooden spoon</span>':''}${top?'<span class="crown">Top couple</span>':''}</span><span class="tt">${r.t}</span><div class="track" aria-hidden="true"><div class="fill" style="width:${(r.t/max*100).toFixed(1)}%"></div></div><span class="split">${r.c.players.map(p=>esc(p)+' '+g.scores[p]).join(' · ')}</span></li>`;
@@ -310,7 +312,7 @@ function render(){
     const lowT=a.low, above=a.tot.filter(x=>x>lowT);
     if(above.length&&a.losers.length===1){const next=Math.min(...above),ni=a.tot.indexOf(next);const m=next-lowT;h+=`<p class="margin">${esc(S.couples[a.losers[0]].name)} finished ${m} point${m===1?'':'s'} behind ${esc(S.couples[ni].name)}.</p>`;}
     else if(a.losers.length>1)h+=`<p class="margin">A tie at the bottom, so both couples pay.</p>`;
-    h+='<div class="dues"><div class="eyebrow">Fines this week · '+gbp(a.fines.reduce((s,f)=>s+f.amount,0))+'</div>';
+    h+='<div class="dues"><div class="eyebrow">Fines for GW'+g.gw+' · '+gbp(a.fines.reduce((s,f)=>s+f.amount,0))+'</div>';
     a.fines.forEach(f=>{h+=`<div class="due"><span><span class="who">${esc(f.p)}</span> <span class="why">· ${f.why==='couple'?'lowest couple':'lowest individual, '+g.scores[f.p]+' pts'} · ${gbp(f.amount)}${f.late?' incl. '+gbp(f.late*S.fine)+' late':''}${f.due?(f.late?' · goes up again ':' · due by ')+fmtD(f.due):''}</span></span>${paidChip(f.paid)}</div>`;});
     if(!a.indiv.length)h+=`<div class="due"><span class="why">No extra individual fine. The lowest scorer was already in the losing couple.</span></div>`;
     h+='</div></section>';
@@ -339,7 +341,7 @@ function render(){
   S.couples.forEach(c=>{c.players.forEach(p=>h+=`<th>${esc(p)}</th>`);h+=`<th>${esc(c.players.map(w=>w[0]).join('+'))}</th>`;});
   h+='</tr></thead><tbody>';
   [...Z.res].reverse().forEach(({g,a})=>{h+=`<tr><td>GW${g.gw}${g.provisional?'*':''}</td>`;S.couples.forEach((c,i)=>{c.players.forEach(p=>{h+=`<td>${g.scores[p]}${a.fines.some(x=>x.p===p)?'<span class="mark">F</span>':''}</td>`;});h+=`<td${a.losers.includes(i)?' class="lowcell"':' style="font-weight:600"'}>${a.tot[i]}</td>`;});h+='</tr>';});
-  h+='</tbody></table></div></section>';
+  h+='</tbody></table></div><p class="swipe muted small">Swipe the table sideways to see every player.</p></section>';
 
   h+=`<section aria-labelledby="r-h"><h2 id="r-h">House rules</h2><div class="muted" style="display:flex;flex-direction:column;gap:6px"><p>The couple with the lowest combined score each week pays ${gbp(S.fine)} per partner. Tied couples all pay.</p><p>${S.rule==='a'?`The player with the lowest individual score also pays ${gbp(S.fine)}, unless they are already in the losing couple.`:`The lowest scorer outside the losing couple also pays ${gbp(S.fine)}.`} Tied players all pay.</p>${S.late?`<p>A fine not paid by the next gameweek's FPL deadline goes up by ${gbp(S.fine)}, and by another ${gbp(S.fine)} at every deadline after that until it is paid. Fines from the last gameweek fall due 7 days after the GW38 deadline, then go up by ${gbp(S.fine)} each week after that.</p>`:''}<p>Scores are FPL gameweek points after transfer hits, so season totals match the official game.</p></div></section>`;
 
