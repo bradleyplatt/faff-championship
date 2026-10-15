@@ -197,6 +197,7 @@ const gbp=n=>'£'+n.toFixed(0);
 const isPaid=(g,p)=>!!(g.paid&&g.paid[p]);
 const NOW=Date.now();
 const fmtD=t=>new Date(t).toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+const fmtUpd=()=>{const u=S.updated||'';if(!u)return'';const d=u.length<=10?new Date(u+'T12:00:00Z'):new Date(u);if(isNaN(d))return u;return u.length<=10?d.toLocaleDateString('en-GB',{timeZone:'Europe/London',weekday:'short',day:'numeric',month:'short'}):d.toLocaleString('en-GB',{timeZone:'Europe/London',weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});};
 function lateCount(g,p){
   if(!S.late)return 0;
   const pv=g.paid&&g.paid[p];
@@ -316,7 +317,7 @@ function render(){
     const rows=S.couples.map((c,i)=>({c,i,t:tot[i]})).sort((x,y)=>y.t-x.t);
     rows.forEach((r,k)=>{r.rank=(k>0&&rows[k-1].t===r.t)?rows[k-1].rank:k+1;});
     const max=Math.max(...tot)||1;
-    h+=`<section class="result" aria-labelledby="v-h"><div class="result-head"><div><div class="eyebrow">This gameweek so far · updated after each match day</div><h2 id="v-h">Gameweek ${g.gw}</h2></div><span class="status prov">After ${esc(g.live)}'s matches</span></div><ol class="bars">`;
+    h+=`<section class="result" aria-labelledby="v-h"><div class="result-head"><div><div class="eyebrow">This gameweek so far${S.updated?' · updated '+esc(fmtUpd()):''}</div><h2 id="v-h">Gameweek ${g.gw}</h2></div><span class="status prov">After ${esc(g.live)}'s matches</span></div><ol class="bars">`;
     rows.forEach(r=>{h+=`<li class="bar-row" style="--c:${SERIES[r.i]}"><span class="rk">${r.rank}</span><span class="cn">${esc(r.c.name)}</span><span class="tt">${r.t}</span><div class="track" aria-hidden="true"><div class="fill" style="width:${(r.t/max*100).toFixed(1)}%"></div></div><span class="split">${r.c.players.map(p=>esc(p)+' '+g.scores[p]).join(' · ')}</span></li>`;});
     h+='</ol>';
     const lo=rows[rows.length-1], nx=rows[rows.length-2];
@@ -330,7 +331,7 @@ function render(){
     const rows=S.couples.map((c,i)=>({c,i,t:a.tot[i],b:a.bench[i]})).sort((x,y)=>(y.t-x.t)||(a.hasBench?y.b-x.b:0));
     rows.forEach((r,k)=>{r.rank=(k>0&&rows[k-1].t===r.t&&(!a.hasBench||rows[k-1].b===r.b))?rows[k-1].rank:k+1;});
     const max=Math.max(...a.tot)||1;
-    h+=`<section class="result" aria-labelledby="v-h"><div class="result-head"><div><div class="eyebrow">Latest result · updates automatically</div><h2 id="v-h">Gameweek ${g.gw}</h2></div><span class="status ${g.provisional?'prov':'final'}">${g.provisional?'Provisional · bonus to come':'Final · bonus included'}</span></div><ol class="bars">`;
+    h+=`<section class="result" aria-labelledby="v-h"><div class="result-head"><div><div class="eyebrow">Latest result${S.updated?' · updated '+esc(fmtUpd()):''}</div><h2 id="v-h">Gameweek ${g.gw}</h2></div><span class="status ${g.provisional?'prov':'final'}">${g.provisional?'Provisional · bonus to come':'Final · bonus included'}</span></div><ol class="bars">`;
     rows.forEach(r=>{
       const low=a.losers.includes(r.i), top=a.top.includes(r.i)&&!low;
       h+=`<li class="bar-row${low?' low':''}" style="--c:${SERIES[r.i]}"><span class="rk">${r.rank}</span><span class="cn">${esc(r.c.name)}${low?'<span class="spoon">Wooden spoon</span>':''}${top?'<span class="crown">Top couple</span>':''}</span><span class="tt">${r.t}</span><div class="track" aria-hidden="true"><div class="fill" style="width:${(r.t/max*100).toFixed(1)}%"></div></div><span class="split">${r.c.players.map(p=>esc(p)+' '+g.scores[p]).join(' · ')}</span></li>`;
@@ -376,7 +377,7 @@ function render(){
 
   h+=`<section aria-labelledby="r-h"><h2 id="r-h">House rules</h2><div class="muted" style="display:flex;flex-direction:column;gap:6px"><p>The couple with the lowest combined score each week pays ${gbp(S.fine)} per partner. If couples are level, the couple with more points on their two benches wins the tie. If bench points are level too, the tied couples all pay.</p><p>${S.rule==='a'?`The player with the lowest individual score also pays ${gbp(S.fine)}, unless they are already in the losing couple.`:`The lowest scorer outside the losing couple also pays ${gbp(S.fine)}.`} If players tie for the lowest score, the one with fewer bench points is the lowest. If bench points are level too, they all pay.</p>${S.late?`<p>A fine not paid by the next gameweek's FPL deadline goes up by ${gbp(S.fine)}, and by another ${gbp(S.fine)} at every deadline after that until it is paid. Fines from the last gameweek fall due 7 days after the GW38 deadline, then go up by ${gbp(S.fine)} each week after that.</p>`:''}<p>Scores are FPL gameweek points after transfer hits, so season totals match the official game.</p></div></section>`;
 
-  h+=`<footer>${S.league?esc(S.league)+' league · ':''}Scores from the official Fantasy Premier League game.${S.gameweeks.some(g=>g.provisional)?' * Provisional until bonus points are added.':''} Last updated ${esc(S.updated||'')}.</footer>`;
+  h+=`<footer>${S.league?esc(S.league)+' league · ':''}Scores from the official Fantasy Premier League game.${S.gameweeks.some(g=>g.provisional)?' * Provisional until bonus points are added.':''} Last updated ${esc(fmtUpd())}.</footer>`;
   app.innerHTML=h;
   wire(Z);
 }
