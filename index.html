@@ -363,6 +363,8 @@ function render(){
 
   const tOwed=Object.values(Z.per).reduce((a,v)=>a+v.owed,0), tPaid=Object.values(Z.per).reduce((a,v)=>a+v.paid,0);
   h+=`<section aria-labelledby="k-h"><div class="sec-head"><h2 id="k-h">The pot</h2></div><div class="kitty"><div><span class="eyebrow">Fines so far</span><b class="num">${gbp(tOwed)}</b></div><div><span class="eyebrow">Paid in</span><b class="num">${gbp(tPaid)}</b></div><div><span class="eyebrow">Still owed</span><b class="num" style="color:${tOwed-tPaid>0?'var(--fine)':'var(--ok)'}">${gbp(tOwed-tPaid)}</b></div></div>`;
+  const CB=(S.contributions||[]),cTot=CB.reduce((s,c)=>s+(+c.amount||0),0);
+  if(CB.length)h+=`<p class="muted small">Plus <b>${gbp(cTot)}</b> in extra contributions (money sent to the wrong account and moved into the pot). Total in the pot: <b>${gbp(tPaid+cTot)}</b>.</p>`;
   const T={couple:[0,0],individual:[0,0],late:[0,0],extra:[0,0]};
   Z.res.forEach(({a})=>a.fines.forEach(f=>{T[f.why][0]++;T[f.why][1]+=S.fine;if(f.late){T.late[0]+=f.late;T.late[1]+=f.late*S.fine;}}));
   Z.extras.forEach(x=>{T.extra[0]++;T.extra[1]+=x.amount;});
