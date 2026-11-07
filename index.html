@@ -230,7 +230,6 @@ b.em{color:var(--ink)}
 .chiptag,.hit{display:inline-block;font-family:var(--display);font-weight:600;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:0 7px;line-height:1.55}
 .chiptag{background:var(--sunk);color:var(--ink-2)}
 .hit{background:var(--fine-soft);color:var(--fine)}
-.trhi{border-left:4px solid var(--ink);background:var(--surface);border-radius:0 10px 10px 0;padding:10px 14px;margin:0;font-size:.92rem;color:var(--ink-2);display:flex;flex-direction:column;gap:4px;list-style:none}
 .trgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
 @media (max-width:760px){.trgrid{grid-template-columns:1fr}}
 .trcard{background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -409,19 +408,8 @@ function transfersSection(){
   const T=S.transfers; if(!T||!T.players)return '';
   const P=T.players, all=players().filter(p=>P[p]);
   const mv=m=>`<span class="o"><span class="sr">Out: </span>${esc(m.out)}</span>${ICON_AR}<span class="i"><span class="sr">in: </span>${esc(m.in)}</span> <span class="small">${esc(m.inTeam||'')}${m.price!=null?' · £'+(+m.price).toFixed(1)+'m':''}</span>`;
-  /* talking points, worked out from the moves themselves */
-  const hi=[], bought={}, sold={};
-  all.forEach(p=>(P[p].moves||[]).forEach(m=>{const k=m.in+'|'+(m.inTeam||'');(bought[k]=bought[k]||{n:m.in,t:m.inTeam,who:[]}).who.push(p);const s=m.out+'|'+(m.outTeam||'');(sold[s]=sold[s]||{n:m.out,who:[]}).who.push(p);}));
-  Object.values(bought).filter(b=>b.who.length>1).forEach(b=>hi.push(`<b>${esc(b.n)}</b> was the week's popular buy: ${esc(listNames(b.who))} both brought him in.`.replace('both',b.who.length>2?'all':'both')));
-  Object.entries(bought).forEach(([k,b])=>{const s=sold[k];if(s){const by=b.who, sel=s.who.filter(x=>!by.includes(x));if(sel.length)hi.push(`<b>${esc(b.n)}</b> changed hands: ${esc(listNames(sel))} sold him and ${esc(listNames(by))} bought him.`);}});
-  Object.values(sold).filter(s=>s.who.length>1).forEach(s=>hi.push(`<b>${esc(s.n)}</b> was shown the door by ${esc(listNames(s.who))}.`));
-  all.filter(p=>+P[p].hit>0).forEach(p=>hi.push(`${esc(p)} took a <b>−${+P[p].hit}</b> points hit.`));
-  all.filter(p=>P[p].chip).forEach(p=>hi.push(`${esc(p)} played the <b>${esc(P[p].chip)}</b>.`));
-  const still=all.filter(p=>!(P[p].moves||[]).length&&!P[p].chip);
-  if(still.length)hi.push(`${esc(listNames(still))} made no transfer${still.length>1?'s':''} and rolled the free transfer.`);
   const n=all.reduce((s,p)=>s+(P[p].moves||[]).length,0);
   let h=`<section id="transfers" aria-labelledby="x-h"><div class="sec-head"><h2 id="x-h">Transfers</h2><span class="muted small">GW${esc(T.gw)} · ${n} move${n===1?'':'s'} before the deadline</span></div>`;
-  if(hi.length)h+=`<ul class="trhi">${hi.map(x=>`<li>${x}</li>`).join('')}</ul>`;
   h+=`<div class="trgrid">${S.couples.map((c,i)=>`<div class="trcard" style="--c:${SERIES[i]}"><h3>${esc(c.name)}</h3>${c.players.filter(p=>P[p]).map(p=>{const d=P[p],ms=d.moves||[];return `<div class="trp"><span><b>${esc(p)}</b>${+d.hit>0?` <span class="hit">−${+d.hit} hit</span>`:''}${d.chip?` <span class="chiptag">${esc(d.chip)}</span>`:''}</span>${ms.length?ms.map(m=>`<span class="trm">${mv(m)}</span>`).join(''):`<span class="trm">${d.chip==='Free Hit'||d.chip==='Wildcard'?'Changes not listed':'No transfer'}</span>`}</div>`;}).join('')}</div>`).join('')}</div>`;
   const SE=T.season;
   if(SE){
