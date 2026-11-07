@@ -595,15 +595,25 @@ function wire(Z){
   if(gc)gc.onclick=()=>{gview='couples';render();};
   if(gp)gp.onclick=()=>{gview='players';render();};
   navSync();
+  document.querySelectorAll('.jump a').forEach(a=>a.addEventListener('click',e=>{
+    const el=document.getElementById(a.hash.slice(1)), bar=$('.jump'); if(!el||!bar)return;
+    e.preventDefault();
+    const top=Math.max(0,el.getBoundingClientRect().top+window.scrollY-bar.offsetHeight-12);
+    const smooth=!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);
+    navLock=a.hash; navSync();
+    window.scrollTo({top,behavior:smooth?'smooth':'auto'});
+    clearTimeout(navLockT); navLockT=setTimeout(()=>{navLock=null;navSync();},smooth?1000:150);
+  }));
   const jn=$('.jump');if(jn){const fade=()=>jn.classList.toggle('more',jn.scrollLeft+jn.clientWidth<jn.scrollWidth-2);jn.addEventListener('scroll',fade,{passive:true});fade();}
 }
 /* Highlight the section in view in the jump bar */
-let navCur=null,navTick=false;
+let navCur=null,navTick=false,navLock=null,navLockT=null;
 function navSync(){
   const links=[...document.querySelectorAll('.jump a')]; if(!links.length)return;
   let cur=links[0];
   links.forEach(a=>{const el=document.getElementById(a.hash.slice(1));if(el&&el.getBoundingClientRect().top<=96)cur=a;});
   if((window.innerHeight+window.scrollY)>=document.documentElement.scrollHeight-4)cur=links[links.length-1];
+  if(navLock)cur=links.find(a=>a.hash===navLock)||cur;
   links.forEach(a=>a===cur?a.setAttribute('aria-current','location'):a.removeAttribute('aria-current'));
   if(cur.hash!==navCur){navCur=cur.hash;const n=cur.parentElement,nl=n.getBoundingClientRect().left,cl=cur.getBoundingClientRect().left-nl,cr=cl+cur.offsetWidth;if(cl<16)n.scrollLeft+=cl-16;else if(cr>n.clientWidth-36)n.scrollLeft+=cr-(n.clientWidth-36);}
 }
