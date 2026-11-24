@@ -80,6 +80,7 @@ section{display:flex;flex-direction:column;gap:12px;min-width:0}
 .chip{display:inline-flex;align-items:center;gap:5px;font-family:var(--display);font-weight:600;font-size:.85rem;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:2px 9px;width:max-content;white-space:nowrap}
 .chip.fine{background:var(--fine-soft);color:var(--fine)}
 .chip.ok{background:var(--sunk);color:var(--ink-2)}
+.chip.due{background:transparent;border:1px solid var(--ink-3);color:var(--ink)}
 .chip.gold{background:var(--sunk);color:var(--ink-2)}
 .chip svg{width:13px;height:13px;flex:none}
 
@@ -315,7 +316,10 @@ const ICON_FINE='<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="
 const ICON_OK='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_AR='<svg class="ar" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const CREST='<svg class="crest" viewBox="6 2 52 61" aria-hidden="true"><path d="M6 3H58V32C58 49 46 58 32 62C18 58 6 49 6 32Z" fill="var(--crest)"/><path d="M26.91 33V8H37.72V12.12H31.59V18.22H37.41V22.34H31.59V33Z" fill="var(--crest-ink)"/><clipPath id="hmk"><path d="M10 7H54V32C54 46 44 54 32 58C20 54 10 46 10 32Z"/></clipPath><g clip-path="url(#hmk)"><rect x="10" y="38" width="14" height="22" fill="#2a78d6"/><rect x="25" y="38" width="14" height="22" fill="#eb6834"/><rect x="40" y="38" width="14" height="22" fill="#1baf7a"/></g></svg>';
-const paidChip=ok=>ok?`<span class="chip ok">${ICON_OK}Paid</span>`:`<span class="chip fine">${ICON_FINE}Owes</span>`;
+const paidChip=(ok,late)=>ok?`<span class="chip ok">${ICON_OK}Paid</span>`:late?`<span class="chip fine">${ICON_FINE}Overdue</span>`:`<span class="chip due">To pay</span>`;
+/* Plain wording for an amount: a late charge is only mentioned when one has actually been added. */
+const fineAmt=x=>x.late?`${gbp(x.amount)} (${gbp(x.amount-x.late*S.fine)} fine + ${gbp(x.late*S.fine)} late charge${x.late>1?'s':''})`:`${gbp(x.amount)}`;
+const fineWhen=x=>x.due?(x.late?` · another ${gbp(S.fine)} is added if not paid by ${fmtD(x.due)}`:` · no late charge if paid by ${fmtD(x.due)}`):'';
 
 /* ---------- rules ---------- */
 function analyse(g){
@@ -443,7 +447,7 @@ function statsStrip(Z){
   return `<div class="stats" aria-label="Season records">${tiles.map(t=>`<div><span class="eyebrow">${t[1]}</span><b class="num">${t[0]}</b><span>${t[2]}</span></div>`).join('')}</div>`;
 }
 function owingRows(list){
-  return list.slice().sort((a,b)=>(a.gw||0)-(b.gw||0)).map(o=>`<div class="due"><span><span class="who">${esc(o.p)}</span> <span class="why">· ${o.gw?'GW'+o.gw+' ':''}${o.why==='extra'?'group ruling':o.why==='couple'?'lowest couple':'lowest individual'} · ${gbp(o.amount)}${o.late?' incl. '+gbp(o.late*S.fine)+' late':''}${o.due?' · '+(o.late?'goes up again ':'due by ')+fmtD(o.due):''}</span></span>${paidChip(false)}</div>`).join('');
+  return list.slice().sort((a,b)=>(a.gw||0)-(b.gw||0)).map(o=>`<div class="due"><span><span class="who">${esc(o.p)}</span> <span class="why">· ${o.gw?'GW'+o.gw+' ':''}${o.why==='extra'?'group ruling':o.why==='couple'?'lowest couple':'lowest individual'} · ${fineAmt(o)}${fineWhen(o)}</span></span>${paidChip(false,o.late)}</div>`).join('');
 }
 
 /* ---------- season end ---------- */
@@ -519,7 +523,7 @@ function render(){
     else if(above.length&&a.losers.length===1){const next=Math.min(...above),ni=a.tot.indexOf(next);const m=next-lowT;h+=`<p class="margin">${esc(S.couples[a.losers[0]].name)} finished ${m} point${m===1?'':'s'} behind ${esc(S.couples[ni].name)}.</p>`;}
     else if(a.losers.length>1)h+=`<p class="margin">A tie at the bottom${a.hasBench?', level on bench points too,':''} so ${a.losers.length===2?'both':'all'} couples pay.</p>`;
     h+='<div class="dues"><div class="eyebrow">Fines for GW'+g.gw+' · '+gbp(a.fines.reduce((s,f)=>s+f.amount,0))+'</div>';
-    a.fines.forEach(f=>{h+=`<div class="due"><span><span class="who">${esc(f.p)}</span> <span class="why">· ${f.why==='couple'?'lowest couple':'lowest individual, '+g.scores[f.p]+' pts'+(a.indivTie?', fewer bench points':'')} · ${gbp(f.amount)}${f.late?' incl. '+gbp(f.late*S.fine)+' late':''}${f.due?(f.late?' · goes up again ':' · due by ')+fmtD(f.due):''}</span></span>${paidChip(f.paid)}</div>`;});
+    a.fines.forEach(f=>{h+=`<div class="due"><span><span class="who">${esc(f.p)}</span> <span class="why">· ${f.why==='couple'?'lowest couple':'lowest individual, '+g.scores[f.p]+' pts'+(a.indivTie?', fewer bench points':'')} · ${fineAmt(f)}${fineWhen(f)}</span></span>${paidChip(f.paid,f.late)}</div>`;});
     if(!a.indiv.length)h+=`<div class="due"><span class="why">No extra individual fine. The lowest scorer was already in the losing couple.</span></div>`;
     const other=Z.outstanding.filter(o=>o.why==='extra'||o.gw!==g.gw);
     if(other.length)h+=`<div class="eyebrow" style="margin-top:12px">Still unpaid from earlier</div>`+owingRows(other);
@@ -547,15 +551,15 @@ function render(){
   const T={couple:[0,0],individual:[0,0],late:[0,0],extra:[0,0]};
   Z.res.forEach(({a})=>a.fines.forEach(f=>{T[f.why][0]++;T[f.why][1]+=S.fine;if(f.late){T.late[0]+=f.late;T.late[1]+=f.late*S.fine;}}));
   Z.extras.forEach(x=>{T.extra[0]++;T.extra[1]+=x.amount;});
-  h+=`<details id="d-types"><summary>Fines by type</summary><div class="tablewrap"><table><thead><tr><th class="l">Type of fine</th><th>Number</th><th>Total</th></tr></thead><tbody>${[['couple','Lowest couple'],['individual','Lowest individual'],['late','Late payment'],['extra','Group rulings']].map(([k,l])=>`<tr><td class="l">${l}</td><td>${T[k][0]}</td><td>${gbp(T[k][1])}</td></tr>`).join('')}</tbody></table></div></details>`;
+  h+=`<details id="d-types"><summary>Fines by type</summary><div class="tablewrap"><table><thead><tr><th class="l">Type of fine</th><th>Number</th><th>Total</th></tr></thead><tbody>${[['couple','Lowest couple'],['individual','Lowest individual'],['late','Late charges'],['extra','Group rulings']].map(([k,l])=>`<tr><td class="l">${l}</td><td>${T[k][0]}</td><td>${gbp(T[k][1])}</td></tr>`).join('')}</tbody></table></div></details>`;
   const anyOwe=players().some(p=>Z.per[p].owed>Z.per[p].paid);
-  h+=`<div class="tablewrap"><table><thead><tr><th class="l">Player</th><th>Fines</th><th>Total</th>${anyOwe?'<th>Owing</th>':''}</tr></thead><tbody>`;
+  h+=`<div class="tablewrap"><table><thead><tr><th class="l">Player</th><th>Fines</th><th>Total</th>${anyOwe?'<th>Unpaid</th>':''}</tr></thead><tbody>`;
   players().map(p=>({p,...Z.per[p]})).sort((a,b)=>b.owed-a.owed||a.p.localeCompare(b.p)).forEach(r=>{
     h+=`<tr><td class="l"><span class="swatch" style="background:${SERIES[coupleOf(r.p)]}"></span>${esc(r.p)}</td><td>${r.n}</td><td>${gbp(r.owed)}</td>${anyOwe?`<td${r.owed>r.paid?' class="f"':''}>${r.owed>r.paid?gbp(r.owed-r.paid):'–'}</td>`:''}</tr>`;});
   h+=`</tbody></table></div>`;
-  const allF=[];Z.res.forEach(({g,a})=>a.fines.forEach(f=>allF.push({gw:g.gw,p:f.p,why:(f.why==='couple'?'Lowest couple':'Lowest individual')+(f.late?' + '+f.late+' late':''),amount:f.amount,paid:f.paid})));Z.extras.forEach(x=>allF.push({gw:x.gw,p:x.player,why:'Group ruling: '+(x.reason||''),amount:x.amount,paid:x.paid}));allF.sort((a,b)=>(b.gw||0)-(a.gw||0));
+  const allF=[];Z.res.forEach(({g,a})=>a.fines.forEach(f=>allF.push({gw:g.gw,p:f.p,why:(f.why==='couple'?'Lowest couple':'Lowest individual')+(f.late?' + '+f.late+' late charge'+(f.late>1?'s':''):''),amount:f.amount,paid:f.paid,late:f.late})));Z.extras.forEach(x=>allF.push({gw:x.gw,p:x.player,why:'Group ruling: '+(x.reason||''),amount:x.amount,paid:x.paid}));allF.sort((a,b)=>(b.gw||0)-(a.gw||0));
   h+=`<details id="d-fines"><summary>Every fine so far (${allF.length})</summary><div class="tablewrap"><table><thead><tr><th>GW</th><th class="l">Who</th><th class="l">Why</th><th>Amount</th><th></th></tr></thead><tbody>`;
-  allF.forEach(f=>{h+=`<tr><td>${f.gw?'GW'+f.gw:'–'}</td><td class="l">${esc(f.p)}</td><td class="l" style="font-weight:400;white-space:normal">${esc(f.why)}</td><td>${gbp(f.amount)}</td><td>${paidChip(f.paid)}</td></tr>`;});
+  allF.forEach(f=>{h+=`<tr><td>${f.gw?'GW'+f.gw:'–'}</td><td class="l">${esc(f.p)}</td><td class="l" style="font-weight:400;white-space:normal">${esc(f.why)}</td><td>${gbp(f.amount)}</td><td>${paidChip(f.paid,f.late)}</td></tr>`;});
   h+='</tbody></table></div></details></section>';
 
   const gv=gview||(window.innerWidth<700?'couples':'players'), PV=gv==='players';
